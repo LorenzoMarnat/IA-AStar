@@ -23,6 +23,7 @@ public class Grid : MonoBehaviour
         public int x { get; set; }
         public int y { get; set; }
         public int cost { get; set; }
+        public int totalCost { get; set; }
         public int heuristique { get; set; }
         public bool inClosedList { get; set; }
         public bool inOpenList { get; set; }
@@ -44,22 +45,22 @@ public class Grid : MonoBehaviour
     private int[,] grid = new int[,]
     {
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+        {1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+        {1,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+        {1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,1},
+        {1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,1},
         {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,1,1,1,1,0,0,0,0,0,1,0,0,0,0,0,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1},
         {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
      };
@@ -69,9 +70,9 @@ public class Grid : MonoBehaviour
         CreateGrid();
         CreateEnnemy();
 
-        //AStar();
-        InvokeRepeating("Dijkstra", 0, 0.10f);
-        InvokeRepeating("EnnemyMove", 0, 0.10f);
+        AStar();
+        //InvokeRepeating("Dijkstra", 0, 0.10f);
+        //InvokeRepeating("EnnemyMove", 0, 0.10f);
     }
 
     private void CreateGrid()
@@ -91,7 +92,7 @@ public class Grid : MonoBehaviour
 
                 tile.transform.position = new Vector2(i* size, j * size);
 
-                tiles[i, j] = new Tile() { x = i, y = j, cost = 1, heuristique = 0, inClosedList = false, inOpenList = false, predX = -1, predY = -1 };
+                tiles[i, j] = new Tile() { x = i, y = j, cost = 1, heuristique = 0, totalCost = 0, inClosedList = false, inOpenList = false, predX = -1, predY = -1 };
             }
         }
     }
@@ -99,7 +100,7 @@ public class Grid : MonoBehaviour
     private void CreateEnnemy()
     {
         ennemy = Instantiate(ennemySprite, transform);
-        ennemy.transform.position = new Vector2(16, 22);
+        ennemy.transform.position = new Vector2(14.5f, 22);
     }
 
     private int Dijkstra()
@@ -185,60 +186,103 @@ public class Grid : MonoBehaviour
     private int AStar()
     {
         List<Tile> closedList = new List<Tile>();
-        Stack<Tile> openList = new Stack<Tile>();
+        List<Tile> openList = new List<Tile>();
 
-        Tile depart = tiles[17, 25];
-        Tile objectif = tiles[17, 24];
-        int xO = Mathf.RoundToInt(objectif.x);
-        int yO = Mathf.RoundToInt(objectif.y);
-        openList.Push(depart);
+        Tile depart = tiles[Mathf.RoundToInt(ennemy.transform.position.x), Mathf.RoundToInt(ennemy.transform.position.y)];
+        Tile objectif = tiles[Mathf.RoundToInt(player.transform.position.x), Mathf.RoundToInt(player.transform.position.y)];
+        int xO = objectif.x;
+        int yO = objectif.y;
+        int xD = depart.x;
+        int yD = depart.y;
+
         depart.inOpenList = true;
+        openList.Add(tiles[xD, yD]);
+
         Debug.Log("Start");
         while (openList.Count > 0)
         {
-            Tile current = openList.Pop();
-            current.inOpenList = false;
+            int minCost = 99999;
 
-            int x = Mathf.RoundToInt(current.x);
-            int y = Mathf.RoundToInt(current.y);
-            Debug.Log("Position "+x+" "+y);
-            Stack<Tile> neighbors = new Stack<Tile>();
+            int x = 0;
+            int y = 0;
+            foreach (Tile t in openList)
+            {
+                if (t.totalCost < minCost)
+                {
+                    minCost = t.totalCost;
+                    x = t.x;
+                    y = t.y;
+                }
+            }
+            Debug.Log("Courrant  " + x + "   " + y);
+            Tile current = tiles[x, y];
+
+            Debug.Log(openList.Count);
+            current.inOpenList = false;
+            openList.Remove(tiles[x, y]);
+
+            current.inClosedList = true;
+            closedList.Add(current);
+            
             if (x == objectif.x && y == objectif.y)
             {
                 Debug.Log("Succes");
                 return 0;
             }
-            
+
+            Stack<Tile> neighbors = new Stack<Tile>();
             if (grid[x + 1, y] == 0)
+            {
                 neighbors.Push(tiles[x + 1, y]);
+                //tiles[x + 1, y].predX = x;
+               // tiles[x + 1, y].predY = y;
+            }
             if (grid[x - 1, y] == 0)
+            {
                 neighbors.Push(tiles[x - 1, y]);
+               // tiles[x - 1, y].predX = x;
+               // tiles[x - 1, y].predY = y;
+            }
             if (grid[x, y + 1] == 0)
+            {
                 neighbors.Push(tiles[x, y+1]);
-            if (grid[x, y-1] == 0)
-                neighbors.Push(tiles[x, y-1]);
+                //tiles[x , y+1].predX = x;
+                //tiles[x, y+1].predY = y;
+            }
+            if (grid[x, y - 1] == 0)
+            {
+                neighbors.Push(tiles[x  ,y-1]);
+                //tiles[x, y-1].predX = x;
+                //tiles[x, y-1].predY = y;
+            }
             
             while(neighbors.Count > 0)
             {
-                Debug.Log("Voisins " + neighbors.Count);
+                //Debug.Log("Voisins " + neighbors.Count);
+                
                 Tile neighbor = neighbors.Pop();
-                if (!(neighbor.inClosedList || (neighbor.inOpenList && neighbor.cost < current.cost)))
+                int xN = neighbor.x;
+                int yN = neighbor.y;
+                
+                if (neighbor.inClosedList)
+                    continue;
+                else
                 {
-                    Debug.Log("Entrer voisin");
-                    neighbor.cost = current.cost +1;
-
-                    int xN = Mathf.RoundToInt(neighbor.x);
-                    int yN = Mathf.RoundToInt(neighbor.y);
-
-                    neighbor.heuristique = neighbor.cost + (Mathf.Abs(xN - xO) + Mathf.Abs(yN - yO));
-                    Debug.Log("Score " + neighbor.heuristique);
-                    openList.Push(neighbor);
-                    neighbor.inOpenList = true;
+                    if((Mathf.Abs(xN - x) + Mathf.Abs(yN - y)) < neighbor.totalCost || !neighbor.inOpenList)
+                    {
+                        neighbor.cost = (Mathf.Abs(xN - x) + Mathf.Abs(yN - y));
+                        neighbor.heuristique = (Mathf.Abs(xN - xO) + Mathf.Abs(yN - yO));
+                        neighbor.totalCost = neighbor.cost + neighbor.heuristique;
+                        if(!neighbor.inOpenList)
+                        {
+                            neighbor.inOpenList = true;
+                            openList.Add(neighbor);
+                        }
+                    }
                 }
             }
-            openList.OrderBy(t => t.heuristique);
-            closedList.Add(current);
-            current.inClosedList = true;
+
+           
             
         }
         Debug.Log("Echec");
@@ -253,7 +297,7 @@ public class Grid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ennemy.transform.position = Vector2.MoveTowards(ennemy.transform.position, new Vector2(nextMove.x, nextMove.y), 4 * Time.deltaTime);
+        //ennemy.transform.position = Vector2.MoveTowards(ennemy.transform.position, new Vector2(nextMove.x, nextMove.y), 4 * Time.deltaTime);
         //Debug.Log(nextMove.x + "  " + nextMove.y);
     }
 }
