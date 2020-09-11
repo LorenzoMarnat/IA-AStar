@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 public class Grid : MonoBehaviour
 {
     public float size;
@@ -14,46 +16,52 @@ public class Grid : MonoBehaviour
     public GameObject ennemySprite;
 
     private GameObject ennemy;
+    public GameObject player;
 
     public struct Tile
     {
-        public GameObject tile { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
         public int cost { get; set; }
         public int heuristique { get; set; }
         public bool inClosedList { get; set; }
         public bool inOpenList { get; set; }
-        public int predX;
-        public int predY;
+        public int predX { get; set; }
+        public int predY { get; set; }
     }
     private Tile[,] tiles;
 
+    private struct Loc
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+    }
+
+    private Stack<Loc> ennemyMoves;
+
+    private Loc nextMove;
+
     private int[,] grid = new int[,]
     {
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
      };
     // Start is called before the first frame update
     void Start()
@@ -61,9 +69,9 @@ public class Grid : MonoBehaviour
         CreateGrid();
         CreateEnnemy();
 
-        //Debug.Log(Mathf.RoundToInt(10.4f));
         //AStar();
-        Dijkstra();
+        InvokeRepeating("Dijkstra", 0, 0.10f);
+        InvokeRepeating("EnnemyMove", 0, 0.10f);
     }
 
     private void CreateGrid()
@@ -83,7 +91,7 @@ public class Grid : MonoBehaviour
 
                 tile.transform.position = new Vector2(i* size, j * size);
 
-                tiles[i, j] = new Tile() { tile = tile, cost = 1, heuristique = 0, inClosedList = false, inOpenList = false };
+                tiles[i, j] = new Tile() { x = i, y = j, cost = 1, heuristique = 0, inClosedList = false, inOpenList = false, predX = -1, predY = -1 };
             }
         }
     }
@@ -91,7 +99,7 @@ public class Grid : MonoBehaviour
     private void CreateEnnemy()
     {
         ennemy = Instantiate(ennemySprite, transform);
-        ennemy.transform.position = new Vector2(17, 25);
+        ennemy.transform.position = new Vector2(16, 22);
     }
 
     private int Dijkstra()
@@ -99,7 +107,7 @@ public class Grid : MonoBehaviour
         int x = Mathf.RoundToInt(ennemy.transform.position.x);
         int y = Mathf.RoundToInt(ennemy.transform.position.y);
         List<Tile> nodes = new List<Tile>();
-        Tile fin = new Tile();
+
         int[,] poids = new int[grid.GetLength(0), grid.GetLength(1)];
         for (int i = 0; i < grid.GetLength(0); i++)
             for (int j = 0; j < grid.GetLength(1); j++)
@@ -110,25 +118,26 @@ public class Grid : MonoBehaviour
                     poids[i, j] = 99;
                 }
             }
-        nodes.Remove(tiles[x, y]);
+        //nodes.Remove(tiles[x, y]);
         poids[x, y] = 0;
 
         while(nodes.Count > 0)
         {
+
             int minCost = 99;
             Tile tile = new Tile();
             foreach(Tile t in nodes)
             {
-                if(t.cost < minCost)
+                if(poids[t.x,t.y] < minCost)
                 {
-                    minCost = t.cost;
+                    minCost = poids[t.x, t.y];
                     tile = t;
                 }
             }
-            x = Mathf.RoundToInt(tile.tile.transform.position.x);
-            y = Mathf.RoundToInt(tile.tile.transform.position.y);
+            x = Mathf.RoundToInt(tile.x);
+            y = Mathf.RoundToInt(tile.y);
             nodes.Remove(tile);
-            
+
             Stack<Tile> neighbors = new Stack<Tile>();
             if (grid[x + 1, y] == 0)
                 neighbors.Push(tiles[x + 1, y]);
@@ -141,21 +150,36 @@ public class Grid : MonoBehaviour
 
             while (neighbors.Count > 0)
             {
+                
                 Tile t = neighbors.Pop();
-                int xV = Mathf.RoundToInt(t.tile.transform.position.x);
-                int yV = Mathf.RoundToInt(t.tile.transform.position.y);
-                if (poids[xV, yV] > poids[x, y] + 1)
+                int xV = Mathf.RoundToInt(t.x);
+                int yV = Mathf.RoundToInt(t.y);
+                if (poids[xV, yV] > poids[x, y] + tiles[xV,yV].cost)
                 {
+
                     poids[xV, yV] = poids[x, y] + 1;
-                    t.predX = x;
-                    t.predY = y;
+                    tiles[xV, yV].predX = x;
+                    tiles[xV, yV].predY = y;
+
                 }
                 
             }
-            fin = tile;
+            
         }
-        Debug.Log
-        
+        int xP = Mathf.RoundToInt(player.transform.position.x);
+        int yP = Mathf.RoundToInt(player.transform.position.y);
+        ennemyMoves = new Stack<Loc>();
+        do
+        {
+            int temp = xP;
+            xP = tiles[xP, yP].predX;
+            yP = tiles[temp, yP].predY;
+            ennemyMoves.Push(new Loc() { x = xP, y = yP });
+        }
+        while (tiles[xP, yP].predX != Mathf.RoundToInt(ennemy.transform.position.x) || tiles[xP, yP].predY != Mathf.RoundToInt(ennemy.transform.position.y));
+
+
+
         return 1;
     }
     private int AStar()
@@ -165,8 +189,8 @@ public class Grid : MonoBehaviour
 
         Tile depart = tiles[17, 25];
         Tile objectif = tiles[17, 24];
-        int xO = Mathf.RoundToInt(objectif.tile.transform.position.x);
-        int yO = Mathf.RoundToInt(objectif.tile.transform.position.y);
+        int xO = Mathf.RoundToInt(objectif.x);
+        int yO = Mathf.RoundToInt(objectif.y);
         openList.Push(depart);
         depart.inOpenList = true;
         Debug.Log("Start");
@@ -175,11 +199,11 @@ public class Grid : MonoBehaviour
             Tile current = openList.Pop();
             current.inOpenList = false;
 
-            int x = Mathf.RoundToInt(current.tile.transform.position.x);
-            int y = Mathf.RoundToInt(current.tile.transform.position.y);
+            int x = Mathf.RoundToInt(current.x);
+            int y = Mathf.RoundToInt(current.y);
             Debug.Log("Position "+x+" "+y);
             Stack<Tile> neighbors = new Stack<Tile>();
-            if (x == objectif.tile.transform.position.x && y == objectif.tile.transform.position.y)
+            if (x == objectif.x && y == objectif.y)
             {
                 Debug.Log("Succes");
                 return 0;
@@ -203,8 +227,8 @@ public class Grid : MonoBehaviour
                     Debug.Log("Entrer voisin");
                     neighbor.cost = current.cost +1;
 
-                    int xN = Mathf.RoundToInt(neighbor.tile.transform.position.x);
-                    int yN = Mathf.RoundToInt(neighbor.tile.transform.position.y);
+                    int xN = Mathf.RoundToInt(neighbor.x);
+                    int yN = Mathf.RoundToInt(neighbor.y);
 
                     neighbor.heuristique = neighbor.cost + (Mathf.Abs(xN - xO) + Mathf.Abs(yN - yO));
                     Debug.Log("Score " + neighbor.heuristique);
@@ -220,9 +244,16 @@ public class Grid : MonoBehaviour
         Debug.Log("Echec");
         return 1;
     }
+
+    private void EnnemyMove()
+    {
+        if (ennemyMoves.Count > 0)
+            nextMove = ennemyMoves.Pop();
+    }
     // Update is called once per frame
     void Update()
     {
-        
+        ennemy.transform.position = Vector2.MoveTowards(ennemy.transform.position, new Vector2(nextMove.x, nextMove.y), 4 * Time.deltaTime);
+        //Debug.Log(nextMove.x + "  " + nextMove.y);
     }
 }

@@ -7,11 +7,22 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
     public int force = 5;
 
+    private GameObject text;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        text = GameObject.FindGameObjectWithTag("gameOver");
+        text.SetActive(false);
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "ennemy")
+        {
+            Time.timeScale = 0;
+            text.SetActive(true);
+        }
+    }
     private void FixedUpdate()
     {
         float x = Input.GetAxis("Horizontal") * Time.fixedDeltaTime;
