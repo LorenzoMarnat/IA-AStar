@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
         text.SetActive(false);
     }
 
+    // Met le jeu en pause et affiche game over si l'ennemie touche le joueur
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "ennemy")
