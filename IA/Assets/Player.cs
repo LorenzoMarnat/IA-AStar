@@ -31,7 +31,6 @@ public class Player : MonoBehaviour
 
         Vector2 movement = new Vector2(x*force, y*force);
 
-        // Appelle la fonction AddForce() du Rigidbody2D rb2d avec le mouvement multiplié par la vitesse.
         rb.transform.Translate(movement);
     }
 }
