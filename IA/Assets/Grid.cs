@@ -17,8 +17,10 @@ public class Grid : MonoBehaviour
     public GameObject ennemySprite;
 
     private GameObject ennemy;
+
     public GameObject player;
     public GameObject text;
+    public GameObject coin;
 
     // Noeud du graphe
     public struct Tile
@@ -284,8 +286,7 @@ public class Grid : MonoBehaviour
             if (grid[x, y - 1] == 0)
                 neighbors.Push(tiles[x  ,y-1]);
 
-            
-            while(neighbors.Count > 0)
+            while (neighbors.Count > 0)
             {
                 Tile neighbor = neighbors.Pop();
                 int xN = neighbor.x;
