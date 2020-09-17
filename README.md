@@ -6,3 +6,5 @@
  Le joueur peut se déplacer librement et n'a pas d'objectif si ce n'est d'éviter de se faire toucher par l'ennemie et ramasser les pièces.
  Le joueur peut changer l'algorithme utilisé par l'ennemie à tout moment en appuyant sur ESPACE.
  Si le joueur est touché, le jeu s'arrête sur un Game Over.
+ 
+ Le projet a été effectué en C# sur Unity en deux jours dans le cadre du cours d'Intelligence Artificiel du Master 2 Gamagora
